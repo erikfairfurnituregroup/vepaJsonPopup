@@ -1,0 +1,873 @@
+
+//staging vepa //  row-pcon-3d.php // 
+
+<?php  
+
+		if ( get_sub_field( 'restricted_content' ) ) {
+			$countries = get_sub_field( 'restricted_content' );
+		} else {
+			$countries = array();
+		}
+		
+		if ( ! in_array( $_COOKIE['country_code'], $countries ) ) {
+			
+			?>
+
+				<?php if(get_sub_field('snelle_navigatie_label')): $qId = get_sub_field('snelle_navigatie_label'); else: $qId = ''; endif; ?>
+
+					<?php if(get_sub_field('pcon-3d')): ?>
+						<?php
+							$a = ICL_LANGUAGE_CODE;
+						?>
+
+
+					<?php $iframeshort = do_shortcode(get_sub_field('pcon-3d')); 
+						
+						$iframeklein = substr ($iframeshort, 0, -11);
+						$iframeland = $iframeklein.$a."&sh=false";	
+
+
+      ?>
+					<section id="<?=$qId;?>" class="content padding <?php if(get_sub_field('fadeIn')){echo 'fadeIn';}?>">
+					  <div class="container <?php if(get_sub_field('fluid')){echo 'fluid';}?>">
+        
+						  
+						<div class="pcondiv">
+						<p class="pHeading"><?php the_sub_field('titel'); ?></p>
+<iframe src="<?php echo $iframeland;?>" width="100%" height="600" style="border:0px solid black;" class ="pcon-iframe" id="pcon-ui-iframe"></iframe> 
+						<script type="text/javascript" src="https://ui.pcon-solutions.com/static/js/iframeResizer.min.js"></script>		
+							
+							<script>iFrameResize({log:false},'#pcon-ui-iframe');</script>						
+							<script>
+							
+								// Get a reference to the iframe element
+								var iframe = document.getElementById('pcon-ui-iframe');
+
+								// Add an event listener to listen for messages from the iframe
+								window.addEventListener('message', function(event) {
+									// Check if the message is from the expected iframe
+									if (event.source === iframe.contentWindow && event.data.action === 'contact-request-pre-inform') {
+										// You can perform any desired actions here when a message is received
+										alert('Message received: Contact-request-pre-inform. Een soort loader tonen!!');
+									}
+									
+									if (event.source === iframe.contentWindow && event.data.action === 'contact-request'){
+										console.log('Dit is de data uit PCON:');
+										console.log( event.data );
+										var pcondata = event.data.data;
+										alert( 'Data is binnen. Zie console.' );
+									}
+									
+								});
+							
+							</script>																							 
+						</div>
+					   </div>
+					</section>
+				<?php endif; ?>
+
+			<?php 
+			
+		}
+?>
+
+
+
+// functions.php //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+<?php
+
+include 'ajax-get-products.php'; 
+
+if (! function_exists( 'vepa_setup' ) ) :
+
+  function vepa_setup() {
+
+    /*
+    *  Load the theme text-domain for translation and WPML purposes
+    */
+    load_theme_textdomain( 'vepa', get_template_directory() . '/languages' );
+
+    /*
+    *  Register theme support
+    */
+    add_theme_support( 'title-tag' );
+    add_theme_support( 'post-thumbnails' );
+
+    /*
+    *  Register navigation menus
+    */
+    register_nav_menu( 'primary', 'Hoofdmenu' );
+	register_nav_menu( 'topbar', 'topbar' );
+    register_nav_menu( 'language', 'Taal switcher' );
+    register_nav_menu( 'primary-mobile', 'Hoofdmenu mobiel' );
+
+    /*
+    *  Register image sizes
+    */
+    add_image_size( 'newsThumb', 710, 400, true );
+    add_image_size( 'projectThumb', 768, 510, true );
+    add_image_size( 'galleryImage', 0, 510, false );
+    add_image_size( 'productThumb', 750, 1000, true  );
+    add_image_size( 'instagramSquare', 400, 400, true );
+	  
+	add_image_size( 'hero_image', 1920 );
+	add_image_size( 'image_video', 380, 214, true );
+
+  }
+
+endif;
+add_action( 'after_setup_theme', 'vepa_setup' );
+
+/*
+*  Register the neccesary widgets
+*/
+function vepa_widgets_init(){
+
+  register_sidebar(
+    array(
+      'name' => 'Footer kolom 1',
+      'id'   => 'footer-col1',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => '<h5>',
+      'after_title'   => '</h5>',
+    )
+  );
+
+  register_sidebar(
+    array(
+      'name' => 'Footer kolom 2',
+      'id'   => 'footer-col2',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => '<h5>',
+      'after_title'   => '</h5>',
+    )
+  );
+
+  register_sidebar(
+    array(
+      'name' => 'Footer kolom 3',
+      'id'   => 'footer-col3',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => '<h5>',
+      'after_title'   => '</h5>',
+    )
+  );
+
+  register_sidebar(
+    array(
+      'name' => 'Footer kolom 4',
+      'id'   => 'footer-col4',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => '<h5>',
+      'after_title'   => '</h5>',
+    )
+  );
+
+}
+add_action( 'widgets_init', 'vepa_widgets_init' );
+
+/*
+*  Enqueue the stylesheets and javascript files
+*/
+function vepa_enqueue(){
+
+  wp_enqueue_style( 'vepa-stylesheet', get_template_directory_uri() . '/assets/css/style.min.css' );
+  wp_enqueue_script( 'slick', get_template_directory_uri() . '/assets/js/raw/slick.min.js', array('jquery') );
+  wp_enqueue_script( 'lightbox', get_template_directory_uri() . '/assets/js/raw/lightbox.min.js', array('jquery') );
+  wp_enqueue_script( 'gMap', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCUT9wqhB5ckjuWJsL-GeVIsmiLZG84Hsg', array('jquery') );
+  wp_enqueue_script( 'ezView', get_template_directory_uri() . '/assets/js/raw/ezview.js', array('jquery') );
+  wp_enqueue_script( 'jquery-ui-accordion' );
+  wp_enqueue_script( 'tabsOrAccordion', get_template_directory_uri() . '/assets/js/raw/tabsOrAccordion.js', array('jquery') );
+  wp_enqueue_script( 'vepa-javascript', get_template_directory_uri() . '/assets/js/raw/toggles.js', array('jquery', 'jquery-ui-tabs') ); /* Has to be changed to the compressed complete JS when ready */
+	wp_localize_script( 'vepa-javascript', 'ajax_object',  array('ajaxurl' => admin_url('admin-ajax.php')));
+  wp_enqueue_script( 'hyphenator', get_template_directory_uri() . '/assets/js/raw/hyphenator.js', array('jquery') );
+
+}
+add_action( 'wp_enqueue_scripts', 'vepa_enqueue' );
+
+/*
+*  Add ACF fields from within functions.php to enhance customization and distribution across multiple environments
+*/
+function vepa_create_fields(){
+
+}
+add_action( 'acf/init', 'vepa_create_fields' );
+
+/*
+*  Enable the SVG mimetype
+*/
+function vepa_file_types($types){
+  $newTypes = array();
+  $newTypes['svg'] = 'image/svg+xml';
+  $types = array_merge($types, $newTypes );
+  return $types;
+}
+add_action('upload_mimes', 'vepa_file_types');
+
+/*
+*  Create shortcode for making text red in textfields and textarea's.
+*/
+add_shortcode( 'rood', 'vepa_shortcode_rood' );
+function vepa_shortcode_rood( $atts, $content = "" ){
+
+  return '<span class="red">'.$content.'</span>';
+
+}
+/*
+*  Create shortcode for making text black in textfields and textarea's.
+*/
+add_shortcode( 'zwart', 'vepa_shortcode_zwart' );
+function vepa_shortcode_zwart( $atts, $content = "" ){
+
+  return '<span class="zwart">'.$content.'</span>';
+
+}
+/*
+*  Create shortcode for making text grey in textfields and textarea's.
+*/
+add_shortcode( 'grijs', 'vepa_shortcode_grijs' );
+function vepa_shortcode_grijs( $atts, $content = "" ){
+
+  return '<span class="grijs">'.$content.'</span>';
+
+}
+
+
+
+function vepa_create_cpts(){
+
+  $labels = array(
+      'name'                => _x( 'Producten', 'Post Type General Name', 'vepa' ),
+      'singular_name'       => _x( 'Product', 'Post Type Singular Name', 'vepa' ),
+      'menu_name'           => __( 'Producten', 'vepa' ),
+      'parent_item_colon'   => __( 'Hoofd product', 'vepa' ),
+      'all_items'           => __( 'Alle producten', 'vepa' ),
+      'view_item'           => __( 'Bekijk product', 'vepa' ),
+      'add_new_item'        => __( 'Nieuw product', 'vepa' ),
+      'add_new'             => __( 'Nieuw', 'vepa' ),
+      'edit_item'           => __( 'Bewerk product', 'vepa' ),
+      'update_item'         => __( 'Update product', 'vepa' ),
+      'search_items'        => __( 'Zoek product', 'vepa' ),
+      'not_found'           => __( 'Niet gevonden', 'vepa' ),
+      'not_found_in_trash'  => __( 'Niet gevonden in de prullenbak', 'vepa' ),
+  );
+
+  $args = array(
+      'label'               => __( 'producten', 'vepa' ),
+      'description'         => __( 'Alle Vepa producten', 'vepa' ),
+      'labels'              => $labels,
+      'supports'            => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
+      'hierarchical'        => false,
+      'public'              => true,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'show_in_nav_menus'   => true,
+      'show_in_admin_bar'   => true,
+      'menu_position'       => 5,
+      'menu_icon'           => 'dashicons-cart',
+      'can_export'          => true,
+      'has_archive'         => true,
+      'exclude_from_search' => false,
+      'publicly_queryable'  => true,
+      'capability_type'     => 'page',
+      'rewrite' => array( 'slug' => 'product' ),
+  );
+
+  register_post_type('producten', $args);
+
+  $labels = array(
+    'name' => _x( 'Categorieën', 'taxonomy general name' ),
+    'singular_name' => _x( 'Categorie', 'taxonomy singular name' ),
+    'search_items' =>  __( 'Zoek categorie' ),
+    'all_items' => __( 'Alle categorieën' ),
+    'parent_item' => __( 'Hoofd categorie' ),
+    'parent_item_colon' => __( 'Hoofd:' ),
+    'edit_item' => __( 'Bewerk' ),
+    'update_item' => __( 'Update' ),
+    'add_new_item' => __( 'Nieuw' ),
+    'new_item_name' => __( 'Nieuwe categorie naam' ),
+    'menu_name' => __( 'Categorieën' ),
+  );
+
+  register_taxonomy('categorieen',array('producten'), array(
+    'hierarchical' => true,
+    'labels' => $labels,
+    'show_ui' => true,
+    'show_admin_column' => true,
+    'query_var' => true,
+    'rewrite' => array( 'slug' => 'product-categorie' ),
+  ));
+
+  $labels = array(
+      'name'                => _x( 'Medewerkers', 'Post Type General Name', 'vepa' ),
+      'singular_name'       => _x( 'medewerker', 'Post Type Singular Name', 'vepa' ),
+      'menu_name'           => __( 'Medewerkers', 'vepa' ),
+      'parent_item_colon'   => __( 'Hoofd Medewerker', 'vepa' ),
+      'all_items'           => __( 'Alle medewerkers', 'vepa' ),
+      'view_item'           => __( 'Bekijk medewerker', 'vepa' ),
+      'add_new_item'        => __( 'Nieuwe medewerker', 'vepa' ),
+      'add_new'             => __( 'Nieuw', 'vepa' ),
+      'edit_item'           => __( 'Bewerk medewerker', 'vepa' ),
+      'update_item'         => __( 'Update medewerker', 'vepa' ),
+      'search_items'        => __( 'Zoek medewerker', 'vepa' ),
+      'not_found'           => __( 'Niet gevonden', 'vepa' ),
+      'not_found_in_trash'  => __( 'Niet gevonden in de prullenbak', 'vepa' ),
+  );
+
+  $args = array(
+      'label'               => __( 'medewerkers', 'vepa' ),
+      'description'         => __( 'Alle Vepa medewerkers', 'vepa' ),
+      'labels'              => $labels,
+      'supports'            => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
+      'hierarchical'        => false,
+      'public'              => false,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'show_in_nav_menus'   => true,
+      'show_in_admin_bar'   => true,
+      'menu_position'       => 5,
+      'menu_icon'           => 'dashicons-universal-access',
+      'can_export'          => true,
+      'has_archive'         => false,
+      'exclude_from_search' => true,
+      'publicly_queryable'  => false,
+      'capability_type'     => 'page',
+      'rewrite' => array( 'slug' => 'medewerkers' ),
+  );
+
+  register_post_type('medewerkers', $args);
+
+  $labels = array(
+    'name' => _x( 'Categorieën-medewerkers', 'taxonomy general name' ),
+    'singular_name' => _x( 'Categorie-medewerker', 'taxonomy singular name' ),
+    'search_items' =>  __( 'Zoek categorie' ),
+    'all_items' => __( 'Alle categorieën' ),
+    'parent_item' => __( 'Hoofd categorie' ),
+    'parent_item_colon' => __( 'Hoofd:' ),
+    'edit_item' => __( 'Bewerk' ),
+    'update_item' => __( 'Update' ),
+    'add_new_item' => __( 'Nieuw' ),
+    'new_item_name' => __( 'Nieuwe categorie naam' ),
+    'menu_name' => __( 'Categorieën' ),
+  );
+
+  register_taxonomy('categorieen-medewerkers',array('medewerkers'), array(
+    'hierarchical' => true,
+    'labels' => $labels,
+    'show_ui' => true,
+    'show_admin_column' => true,
+    'query_var' => true,
+    'rewrite' => array( 'slug' => 'medewerkers-categorie' ),
+  ));
+
+
+  $labels = array(
+      'name'                => _x( 'Projecten', 'Post Type General Name', 'vepa' ),
+      'singular_name'       => _x( 'Project', 'Post Type Singular Name', 'vepa' ),
+      'menu_name'           => __( 'Projecten', 'vepa' ),
+      'parent_item_colon'   => __( 'Hoofd Project', 'vepa' ),
+      'all_items'           => __( 'Alle Projecten', 'vepa' ),
+      'view_item'           => __( 'Bekijk Project', 'vepa' ),
+      'add_new_item'        => __( 'Nieuw Project', 'vepa' ),
+      'add_new'             => __( 'Nieuw', 'vepa' ),
+      'edit_item'           => __( 'Bewerk Project', 'vepa' ),
+      'update_item'         => __( 'Update Project', 'vepa' ),
+      'search_items'        => __( 'Zoek Project', 'vepa' ),
+      'not_found'           => __( 'Niet gevonden', 'vepa' ),
+      'not_found_in_trash'  => __( 'Niet gevonden in de prullenbak', 'vepa' ),
+  );
+
+  $args = array(
+      'label'               => __( 'projecten', 'vepa' ),
+      'description'         => __( 'Alle Vepa projecten', 'vepa' ),
+      'labels'              => $labels,
+      'supports'            => array( 'title', 'editor', 'thumbnail', 'custom-fields' ),
+      'hierarchical'        => false,
+      'public'              => true,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'show_in_nav_menus'   => true,
+      'show_in_admin_bar'   => true,
+      'menu_position'       => 6,
+      'menu_icon'           => 'dashicons-admin-appearance',
+      'can_export'          => true,
+      'has_archive'         => true,
+      'exclude_from_search' => false,
+      'publicly_queryable'  => true,
+      'capability_type'     => 'page',
+      'rewrite' => array( 'slug' => 'project' ),
+  );
+
+  register_post_type('projecten', $args);
+
+  $labels = array(
+    'name' => _x( 'Project Categorieën', 'taxonomy general name' ),
+    'singular_name' => _x( 'Project Categorie', 'taxonomy singular name' ),
+    'search_items' =>  __( 'Zoek Project categorie' ),
+    'all_items' => __( 'Alle Project categorieën' ),
+    'parent_item' => __( 'Hoofd Project categorie' ),
+    'parent_item_colon' => __( 'Hoofd:' ),
+    'edit_item' => __( 'Bewerk' ),
+    'update_item' => __( 'Update' ),
+    'add_new_item' => __( 'Nieuw' ),
+    'new_item_name' => __( 'Nieuwe Project naam' ),
+    'menu_name' => __( 'Project Categorieën' ),
+  );
+
+  register_taxonomy('project-categorie',array('projecten'), array(
+    'hierarchical' => true,
+    'labels' => $labels,
+    'show_ui' => true,
+    'show_admin_column' => true,
+    'query_var' => true,
+    'rewrite' => array( 'slug' => 'project-categorie' ),
+  ));
+
+}
+add_action('init', 'vepa_create_cpts');
+
+/*
+*  Register options page
+*/
+if(function_exists('acf_add_options_page')){
+  acf_add_options_page( 'Algemene instellingen oud' );
+}
+
+add_filter('wp_nav_menu_objects', 'my_wp_nav_menu_objects', 10, 2);
+
+
+function add_acf_option_page() {
+    if( function_exists('acf_add_options_page') ) {
+        acf_add_options_page(array(
+            'page_title'    => 'Algemene instellingen',
+            'menu_title'    => 'Algemene instellingen',
+            'menu_slug'     => 'Algemene-instellingen',
+            'redirect'      => false
+        ));
+        acf_add_options_sub_page( array(
+            'page_title'  => __( 'Call to action', 'textdomain' ),
+            'menu_title'  => __( 'Call to action', 'textdomain' ),
+            'parent_slug' => 'Algemene-instellingen',
+             'menu_slug'   => 'Call-to-action-page',
+        ) );
+    }
+}
+add_action('acf/init', 'add_acf_option_page' );
+
+
+
+
+
+function my_wp_nav_menu_objects( $items, $args ) {
+
+	foreach( $items as &$item ) {
+	    // vars
+	    $icon = get_field('afbeelding', $item);
+
+	    // append icon
+	    if( $icon ) {
+
+	        $item->title = '<img src="'.$icon['url'].'" alt="'.$icon['alt'].'" />' . $item->title;
+
+	    }
+	}
+
+	// return
+	return $items;
+}
+
+function my_acf_google_map_api( $api ){
+
+	$api['key'] = 'AIzaSyCUT9wqhB5ckjuWJsL-GeVIsmiLZG84Hsg';
+
+	return $api;
+
+}
+
+add_filter('acf/fields/google_map/api', 'my_acf_google_map_api');
+
+function vepa_button_shortcode( $atts, $content = null, $tag ){
+
+  $atts = shortcode_atts(array(
+    'url' => 'https://vepa.nl'
+  ), $atts, $tag);
+
+  return '<a class="btn colored" href="'.$atts['url'].'">'.$content.'</a>';
+
+}
+add_shortcode('button', 'vepa_button_shortcode');
+
+/**
+ *  Function retrieves the IP-address of the website user.
+ *  @return String IP address (either IPv4 or IPv6)
+ */
+  function get_actual_ip_address(): String {
+
+    if ( !empty($_SERVER['HTTP_CLIENT_IP']) ) {
+
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+
+    } elseif ( !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+
+    } else {
+
+        $ip = $_SERVER['REMOTE_ADDR'];
+
+    }
+    return $ip;
+
+  }
+
+  /**
+   *  Function returns the country of the website visitor, based on their IP-address.
+   *  Scans for an existing cookie, of non-existstent an API-call is done.
+   *
+   *  @return String Country-code.
+   */
+  function get_country(): String {
+
+    if ( isset( $_COOKIE['country_code'] ) ) {
+
+      return $_COOKIE['country_code'];
+
+    } else {
+
+      $user_ip = get_actual_ip_address();
+      $country_code = fetch_country( $user_ip );
+      $expiry_time = time() + (86400 * 30); // 86400 = 1 day, thus meaning the cookie is set for 30 days.
+
+      setcookie( 'country_code', $country_code, $expiry_time, "/" ); // Set cookie for the entire domain.
+      return $country_code;
+
+    }
+
+  }
+
+/**
+ * Function detects whether the request comes from a bot.
+ * @return Boolean 
+ */ 
+function is_bot(){
+
+	if(isset($_SERVER['HTTP_USER_AGENT'])) {
+		return preg_match('/rambler|abacho|acoi|accona|aspseek|altavista|estyle|scrubby|lycos|geona|ia_archiver|alexa|sogou|skype|facebook|twitter|pinterest|linkedin|naver|bing|google|yahoo|duckduckgo|yandex|baidu|teoma|xing|java\/1.7.0_45|bot|crawl|slurp|spider|AhrefsBot|robot|googlebot|wordpress|Applebot|MJ12bot|SemrushBot|zoominfobot|Velen|CFNetwork|Pinterest|Yandex|DotBot|BLEXBot|SeznamBot|crawl|MegaIndex.ru|python|link|nutch|Sogou|mediapartners|\sask\s|\saol\s/i', $_SERVER['HTTP_USER_AGENT']);
+	}
+
+  return false;
+}
+
+/**
+ *  Function gets the country based on their IP-address
+ *  Function also saves the result to a cookie.
+ *
+ *  @param String $ip IP-address
+ *
+ *  @return String Country-codex
+ */
+function fetch_country( String $ip ): String {
+
+	if ( is_bot() ) {
+		return 'NL';
+	}
+
+  $options = stream_context_create(array('http'=>
+      array(
+        'timeout' => 10
+      ),
+  ));
+  $return = json_decode( file_get_contents("https://ipwebservice.vepa.nl/wp-json/vepa-webservice/v1/address?ip={$ip}", false, $options) , true);
+
+  return $return;
+
+}
+
+function vepa_add_search_menu( $items, $args )  {
+
+  if( $args->theme_location == 'topbar' ){
+
+    $country = get_country();
+
+    if ( $country == 'IE' || $country == 'GB' ) {
+      $items .= '<li><a target="_blank" href="https://vepauk.ffgportal.com"><img class="accountIcon" src="'.get_template_directory_uri().'/assets/img/gebruiker.svg" alt="Account"></a></li>';
+    } else {
+      $items .= '<li><a target="_blank" href="https://vepa.ffgportal.com"><img class="accountIcon" src="'.get_template_directory_uri().'/assets/img/gebruiker.svg" alt="Account"></a></li>';
+    }
+    $items .= '<li><img class="searchIcon" src="'.get_template_directory_uri().'/assets/img/search.svg" alt="Zoeken"></li>';
+  }
+
+  return $items;
+
+}
+add_filter( 'wp_nav_menu_items', 'vepa_add_search_menu', 10, 2 );
+
+/*
+*  Enqueue save button script when on post.php page in the backend
+*/
+function vepa_load_scripts($hook) {
+
+	if( $hook == 'post.php' ){
+    wp_enqueue_script( 'save-button-js', get_template_directory_uri() . '/assets/js/raw/save_button.js' );
+  }
+
+}
+add_action('admin_enqueue_scripts', 'vepa_load_scripts');
+
+/* Add Google Tag Manager javascript code as close to
+the opening <head> tag as possible
+=====================================================*/
+function add_gtm_head(){
+?>
+
+<!-- Google Tag Manager -->
+
+<!-- End Google Tag Manager -->
+
+<?php
+}
+add_action( 'wp_head', 'add_gtm_head', 10 );
+
+/* Add Google Tag Manager noscript codeimmediately after
+the opening <body> tag
+========================================================*/
+function add_gtm_body(){
+?>
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K8S2X8J"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<?php
+}
+add_action( 'body_top', 'add_gtm_body' );
+
+function load_popup(){
+
+    $popup = $_GET['drentea-vepa'];
+
+    if(!empty($popup)){
+
+      include_once( 'template-parts/template-popup.php' );
+
+    }
+
+}
+
+function pcon_popup(){
+
+    $popup = $_GET['pcon_popup'];
+
+    if(!empty($popup)){
+
+      include_once( 'template-parts/template-pcon-popup.php' );
+    }
+}
+
+
+
+
+
+function NomiquePopup() {
+
+  //$popupNomique = $_GET['nomique-vepa'];
+
+  if(array_key_exists('nomique-vepa', $_GET)){
+    if(!isset($_COOKIE['popup1'])){
+       setcookie('popup1', 'popup1');
+       include_once( 'template-parts/template-nomique-popup.php' );
+   }
+   elseif(!isset($_COOKIE['popup2'])  ){
+        setcookie('popup2', 'popup2');
+        include_once( 'template-parts/template-nomique-popup.php' );
+}
+
+  }
+
+
+}
+add_action('body_top', 'NomiquePopup');
+
+
+
+function cc_mime_types($mimes) {
+  $mimes['svg'] = 'image/svg+xml';
+  return $mimes;
+}
+add_filter('upload_mimes', 'cc_mime_types');
+
+/**
+ * Changing default error message Gravity Forms (GF2.5)
+ */
+add_filter("gform_validation_message", "gwp_change_message", 10, 2);
+function gwp_change_message($message, $form){
+	return '<h2 class="gform_submission_error hide_summary">
+				<span class="gform-icon gform-icon--close"></span>
+				'.__('Oeps, er ging iets mis. Controleer de gemarkeerde velden..', 'textdomain').'
+			</h2>';
+}
+
+//color picker pre defined kleuren
+function my_acf_input_admin_footer () {
+    ?>
+      <style>
+      .wp-picker-clear {
+        display: none !important;
+      }
+    
+      .wp-picker-container {
+        display: block;
+      }
+      .wp-picker-input-wrap{
+        display: none !important;
+      }
+      .wp-picker-container input[type=text].wp-color-picker {
+        outline: 0 !important;
+        border: 1px solid #dddddd !important;
+        box-shadow: none !important;
+        pointer-events: none;
+      }
+    
+      .wp-picker-container:active {
+        display: block;
+      }
+    
+      .iris-picker.iris-border {
+        width: 100% !important;
+        height: auto !important;
+        padding-bottom: 0 !important;
+        border: 0;
+      }
+    
+      .iris-border .iris-picker-inner {
+        display: none;
+      }
+    
+      .iris-palette-container {
+        position: static !important;
+        font-size: 0;
+        line-height: 1;
+        padding: 3px;
+      }
+    
+      .iris-palette {
+        border: 3px solid white;
+        border-radius: 5px !important;
+        box-shadow: inset 0 0 1px black !important;
+        display: inline-block;
+        float: none !important;
+        height: 36.9px !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
+        width: 36.9px !important;
+      }
+    
+      .wp-picker-clear {
+        display: inline-block !important;
+      }
+      </style>
+      <?php 
+      
+      ?>
+      <script>
+      (function($) {
+        acf.add_filter('color_picker_args', function(args, $field) {
+          args.palettes = [
+            '#7b9a9d',
+            '#a9b474',
+            '#8a8283',
+            '#847669',
+            '#dc746a'
+          ]
+          return args
+        })
+      })(jQuery)
+      </script>
+    <?php
+    }
+    add_action('acf/input/admin_footer', 'my_acf_input_admin_footer');
+// Register Custom Post Type
+function Vacatures() {
+
+	$labels = array(
+		'name'                  => _x( 'Vacatures', 'Post Type General Name', 'text_domain' ),
+		'singular_name'         => _x( 'vacature', 'Post Type Singular Name', 'text_domain' ),
+		'menu_name'             => __( 'Vacatures', 'text_domain' ),
+		'name_admin_bar'        => __( 'Vacature', 'text_domain' ),
+		'archives'              => __( 'Item Archives', 'text_domain' ),
+		'attributes'            => __( 'Item Attributes', 'text_domain' ),
+		'parent_item_colon'     => __( 'Parent Item:', 'text_domain' ),
+		'all_items'             => __( 'All Items', 'text_domain' ),
+		'add_new_item'          => __( 'Add New Item', 'text_domain' ),
+		'add_new'               => __( 'Nieuwe vacature', 'text_domain' ),
+		'new_item'              => __( 'Nieuwe vacature', 'text_domain' ),
+		'edit_item'             => __( 'Edit Item', 'text_domain' ),
+		'update_item'           => __( 'Update Item', 'text_domain' ),
+		'view_item'             => __( 'View Item', 'text_domain' ),
+		'view_items'            => __( 'View Items', 'text_domain' ),
+		'search_items'          => __( 'Search Item', 'text_domain' ),
+		'not_found'             => __( 'Not found', 'text_domain' ),
+		'not_found_in_trash'    => __( 'Not found in Trash', 'text_domain' ),
+		'featured_image'        => __( 'Featured Image', 'text_domain' ),
+		'set_featured_image'    => __( 'Set featured image', 'text_domain' ),
+		'remove_featured_image' => __( 'Remove featured image', 'text_domain' ),
+		'use_featured_image'    => __( 'Use as featured image', 'text_domain' ),
+		'insert_into_item'      => __( 'Insert into item', 'text_domain' ),
+		'uploaded_to_this_item' => __( 'Uploaded to this item', 'text_domain' ),
+		'items_list'            => __( 'Vacature lijst', 'text_domain' ),
+		'items_list_navigation' => __( 'Items list navigation', 'text_domain' ),
+		'filter_items_list'     => __( 'Filter items list', 'text_domain' ),
+	);
+	$args = array(
+		'label'                 => __( 'vacature', 'text_domain' ),
+		'description'           => __( 'Vacatures', 'text_domain' ),
+		'labels'                => $labels,
+		'supports'              => array( 'title' ),
+		'taxonomies'            => array( 'category', 'post_tag' ),
+		'hierarchical'          => false,
+		'public'                => true,
+		'show_ui'               => true,
+		'show_in_menu'          => true,
+		'menu_position'         => 5,
+		'show_in_admin_bar'     => true,
+		'show_in_nav_menus'     => true,
+		'can_export'            => false,
+		'has_archive'           => false,
+		'exclude_from_search'   => false,
+		'publicly_queryable'    => true,
+		'capability_type'       => 'page',
+	);
+	register_post_type( 'Vacatures', $args );
+
+}
+add_action( 'init', 'Vacatures', 0 );
+
+add_filter( 'walker_nav_menu_start_el', 'vepa_exclude_menu_items_location', 10, 2 );
+function vepa_exclude_menu_items_location( $item_output, $menu_item ){
+	
+	$location = get_country();
+	$excluded = get_field( 'excluded_languages', $menu_item );
+	
+	if( !empty( $excluded ) && $excluded !== NULL && in_array( $location, $excluded ) ) {
+		
+		$item_output = ''; // Empty the output of the menu item.
+		
+	}
+	
+	return $item_output;
+	
+}
+
+// einde functions.php// 
+																										 
+																														 
+																														 
+																														 
+																														 
+																										 
